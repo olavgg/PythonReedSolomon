@@ -3,6 +3,8 @@
 import sys
 import binascii
 
+from reed_solomon import ReedSolomon
+
 headerSep = '|'
 
 class SampleEncoder(object):
@@ -28,8 +30,8 @@ class SampleEncoder(object):
             f.seek(0, 2)
             fileSize = f.tell()
             size_as_bytes = int(fileSize).to_bytes(4, byteorder='big')
-            print("SIZE as bytes:")
-            print(binascii.hexlify(size_as_bytes))
+            #print("SIZE as bytes:")
+            #print(binascii.hexlify(size_as_bytes))
 
             # Figure out how big each shard will be.  The total size stored
             # will be the file size (8 bytes) plus the file.
@@ -56,8 +58,8 @@ class SampleEncoder(object):
             # noinspection PyTypeChecker
             f.readinto(allBytesView[SampleEncoder.BYTES_IN_INT:])
 
-            print("DATA:")
-            print(binascii.hexlify(allBytes))
+            #print("DATA:")
+            #print(binascii.hexlify(allBytes))
 
             # Make the buffers to hold the shards.
             shards = [
@@ -68,10 +70,14 @@ class SampleEncoder(object):
             # Fill in the data shards
             for i in range(SampleEncoder.DATA_SHARDS):
                 shards[i] = allBytes[i*shardSize:(i*shardSize)+ shardSize]
-                print("SHARD "+str(i)+":")
-                print(binascii.hexlify(shards[i]))
+                #print("SHARD "+str(i)+":")
+                #print(binascii.hexlify(shards[i]))
 
             # Use Reed-Solomon to calculate the parity.
+            rs = ReedSolomon(
+                SampleEncoder.DATA_SHARDS,
+                SampleEncoder.PARITY_SHARDS
+            )
 
 
             f.close()
